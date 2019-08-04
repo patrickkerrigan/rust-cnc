@@ -1,0 +1,11 @@
+[package]
+name = "rust-cnc"
+version = "0.1.0"
+authors = ["Patrick Kerrigan"]
+edition = "2018"
+
+[dependencies]
+libc = "*"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
