@@ -4,6 +4,12 @@ use std::slice;
 use crate::spline::Spline;
 
 #[derive(PartialEq)]
+enum LineParserState {
+    Start,
+    End
+}
+
+#[derive(PartialEq)]
 enum PolylineParserState {
     VertexCount,
     Closed,
@@ -16,11 +22,13 @@ enum SplineParserState {
     ControlPoint,
 }
 
+type DataPair<'a> = (&'a str, &'a str);
+
 pub fn parse(dxf_contents: &str) -> Vec<PolyLine> {
     convert(&collect_pairs(dxf_contents))
 }
 
-fn collect_pairs(dxf_contents: &str) -> Vec<(&str, &str)> {
+fn collect_pairs(dxf_contents: &str) -> Vec<DataPair> {
     let mut pairs = vec![];
 
     let mut line_iterator = dxf_contents.lines();
@@ -35,7 +43,47 @@ fn collect_pairs(dxf_contents: &str) -> Vec<(&str, &str)> {
     pairs
 }
 
-fn parse_polyline(iterator: &mut slice::Iter<(&str, &str)>) -> Option<PolyLine> {
+fn parse_line(iterator: &mut slice::Iter<DataPair>) -> Option<PolyLine> {
+    let mut vertices = vec![];
+    let mut state = LineParserState::Start;
+    let mut vert = PartialVertex::new();
+
+    while let Some(&pair) = iterator.next() {
+        match pair {
+            ("10", x) if state == LineParserState::Start => {
+                vert.x = Some(x.parse().unwrap());
+            },
+
+            ("20", y) if state == LineParserState::Start => {
+                vert.y = Some(y.parse().unwrap());
+            },
+
+            ("11", x) if state == LineParserState::End => {
+                vert.x = Some(x.parse().unwrap());
+            },
+
+            ("21", y) if state == LineParserState::End => {
+                vert.y = Some(y.parse().unwrap());
+            }
+
+            _ => continue
+        }
+
+        if let Some(v) = Vertex::from_partial(&vert) {
+            vertices.push(v);
+            vert = PartialVertex::new();
+            state = LineParserState::End;
+        }
+
+        if state == LineParserState::End && vertices.len() == 2 {
+            return Some(PolyLine{vertices, closed: false});
+        }
+    }
+
+    None
+}
+
+fn parse_polyline(iterator: &mut slice::Iter<DataPair>) -> Option<PolyLine> {
     let mut vertices = vec![];
     let mut state = PolylineParserState::VertexCount;
     let mut vert = PartialVertex::new();
@@ -84,7 +132,7 @@ fn parse_polyline(iterator: &mut slice::Iter<(&str, &str)>) -> Option<PolyLine> 
     None
 }
 
-fn parse_spline(iterator: &mut slice::Iter<(&str, &str)>) -> Option<Spline> {
+fn parse_spline(iterator: &mut slice::Iter<DataPair>) -> Option<Spline> {
     let mut vertices = vec![];
     let mut state = SplineParserState::ControlPointCount;
     let mut vert = PartialVertex::new();
@@ -127,12 +175,18 @@ fn parse_spline(iterator: &mut slice::Iter<(&str, &str)>) -> Option<Spline> {
     None
 }
 
-fn convert(pairs: &Vec<(&str, &str)>) -> Vec<PolyLine> {
+fn convert(pairs: &Vec<DataPair>) -> Vec<PolyLine> {
     let mut lines = vec![];
     let mut iterator = pairs.iter();
 
     while let Some(&pair) = iterator.next() {
         match pair {
+            ("100", "AcDbLine") => {
+                if let Some(line) = parse_line(&mut iterator) {
+                    lines.push(line);
+                }
+            },
+
             ("100", "AcDbPolyline") => {
                 if let Some(line) = parse_polyline(&mut iterator) {
                     lines.push(line);

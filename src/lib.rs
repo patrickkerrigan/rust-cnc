@@ -1,6 +1,6 @@
 use std::os::raw::c_char;
 use std::ffi::{CStr, CString};
-use crate::polyline::PolyLine;
+use crate::polyline::{PolyLine, glue_polylines};
 use crate::parser::parse;
 
 mod vertex;
@@ -33,7 +33,9 @@ pub extern fn gcode_free(s: *mut c_char) {
 }
 
 pub fn process(dxf_contents: &str) -> String {
-    generate_gcode(&parse(&dxf_contents)) + "M05 F2000 X0 Y0"
+    String::from("G01\n")
+        + generate_gcode(&glue_polylines(parse(&dxf_contents))).as_str()
+        + "M05 F2000 X0 Y0"
 }
 
 fn generate_gcode(lines: &Vec<PolyLine>) -> String {
@@ -61,3 +63,4 @@ fn polyline_to_gcode(line: &PolyLine) -> String {
 
     gcode + gcode_end.as_str()
 }
+
