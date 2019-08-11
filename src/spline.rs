@@ -10,7 +10,7 @@ pub struct Spline {
 impl Spline {
     pub fn into_polyline(self) -> PolyLine {
         let mut points = vec![Vertex{x: self.control_points[0].x, y: self.control_points[0].y}];
-        let resolution = (self.control_points[0].distance_to(&self.control_points[3]) as i64 * 4).min(25);
+        let resolution = (self.control_points[0].distance_to(&self.control_points[3]) as i64 * 4).min(25).max(6);
         let step = 1f64 / (resolution as f64 - 1f64);
 
         for s in 1..(resolution - 2) {
