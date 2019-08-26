@@ -1,3 +1,5 @@
+[![Build Status](https://img.shields.io/travis/patrickkerrigan/rust-cnc.svg?style=flat-square)](https://travis-ci.org/patrickkerrigan/rust-cnc)
+
 # rust-cnc
 
 A rust library for generating G-Code from CAD files for use with CNC machines.
