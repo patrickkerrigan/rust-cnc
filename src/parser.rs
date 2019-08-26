@@ -2,6 +2,7 @@ use crate::polyline::PolyLine;
 use crate::vertex::{PartialVertex, Vertex};
 use std::slice;
 use crate::spline::Spline;
+use crate::circle::Circle;
 
 #[derive(PartialEq)]
 enum LineParserState {
@@ -20,6 +21,12 @@ enum PolylineParserState {
 enum SplineParserState {
     ControlPointCount,
     ControlPoint,
+}
+
+#[derive(PartialEq)]
+enum CircleParserState {
+    Centre,
+    Radius
 }
 
 type DataPair<'a> = (&'a str, &'a str);
@@ -175,6 +182,40 @@ fn parse_spline(iterator: &mut slice::Iter<DataPair>) -> Option<Spline> {
     None
 }
 
+fn parse_circle(iterator: &mut slice::Iter<DataPair>) -> Option<Circle> {
+    let mut state = CircleParserState::Centre;
+    let mut vert = PartialVertex::new();
+    let mut radius: f64 = 0.0;
+
+    while let Some(&pair) = iterator.next() {
+        match pair {
+            ("10", x) if state == CircleParserState::Centre => {
+                vert.x = Some(x.parse().unwrap());
+            },
+
+            ("20", y) if state == CircleParserState::Centre => {
+                vert.y = Some(y.parse().unwrap());
+            },
+
+            ("40", r) if state == CircleParserState::Radius => {
+                radius = r.parse().unwrap();
+            }
+
+            _ => continue
+        }
+
+        if let Some(_) = Vertex::from_partial(&vert) {
+            state = CircleParserState::Radius;
+        }
+
+        if state == CircleParserState::Radius && radius > 0.0 {
+            return Some(Circle{centre: Vertex::from_partial(&vert).unwrap(), radius});
+        }
+    }
+
+    None
+}
+
 fn convert(pairs: &Vec<DataPair>) -> Vec<PolyLine> {
     let mut lines = vec![];
     let mut iterator = pairs.iter();
@@ -196,6 +237,12 @@ fn convert(pairs: &Vec<DataPair>) -> Vec<PolyLine> {
             ("100", "AcDbSpline") => {
                 if let Some(spline) = parse_spline(&mut iterator) {
                     lines.push(spline.into_polyline());
+                }
+            },
+
+            ("100", "AcDbCircle") => {
+                if let Some(circle) = parse_circle(&mut iterator) {
+                    lines.push(circle.into_polyline());
                 }
             },
 

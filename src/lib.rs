@@ -7,6 +7,7 @@ mod vertex;
 mod polyline;
 mod spline;
 mod parser;
+mod circle;
 
 #[no_mangle]
 pub extern fn dxf_to_gcode(s: *const c_char) -> *mut c_char {
