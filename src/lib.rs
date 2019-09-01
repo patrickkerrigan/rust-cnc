@@ -23,14 +23,17 @@ pub extern fn dxf_to_gcode(s: *const c_char) -> *mut c_char {
 
     let gcode = process(dxf);
 
-    let c_str_song = CString::new(gcode).unwrap();
-    c_str_song.into_raw()
+    let c_str_gcode = CString::new(gcode).unwrap();
+    c_str_gcode.into_raw()
 }
 
 #[no_mangle]
 pub extern fn gcode_free(s: *mut c_char) {
     unsafe {
-        if s.is_null() { return }
+        if s.is_null() {
+            return
+        }
+
         CString::from_raw(s)
     };
 }
