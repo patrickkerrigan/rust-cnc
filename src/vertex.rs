@@ -22,7 +22,7 @@ impl Vertex {
 
     pub fn from_polar(radius: f64, azimuth: f64) -> Vertex {
         Vertex {
-            x: azimuth.cos() *radius,
+            x: azimuth.cos() * radius,
             y: azimuth.sin() * radius
         }
     }
