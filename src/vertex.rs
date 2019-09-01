@@ -67,6 +67,10 @@ impl Vertex {
         }
     }
 
+    pub fn angle_to(&self, other: &Vertex) -> f64 {
+        (other.y - self.y).atan2(other.x - self.x)
+    }
+
 }
 
 impl Add for Vertex {

@@ -22,8 +22,8 @@ fn get_bulge_arc(start_point: &Vertex, end_point: &Vertex, bulge: f64) -> Arc {
 
     let centre = midpoint + centre_vector;
 
-    let start_angle = (start_point.y - centre.y).atan2(start_point.x - centre.x);
-    let mut end_angle = (end_point.y - centre.y).atan2(end_point.x - centre.x);
+    let start_angle = centre.angle_to(start_point);
+    let mut end_angle = centre.angle_to(end_point);
 
     if end_angle < start_angle && bulge_sign.is_sign_positive() {
         end_angle += 2.0 * PI;
