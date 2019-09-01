@@ -20,6 +20,13 @@ impl Vertex {
         }
     }
 
+    pub fn from_polar(radius: f64, azimuth: f64) -> Vertex {
+        Vertex {
+            x: azimuth.cos() *radius,
+            y: azimuth.sin() * radius
+        }
+    }
+
     pub fn distance_to(&self, other: &Vertex) -> f64 {
         self.vector_to(other).magnitude()
     }

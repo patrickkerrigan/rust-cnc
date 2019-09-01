@@ -17,10 +17,8 @@ impl Circle {
 
         for i in (0..360).step_by(resolution as usize) {
             let rad = (i as f64).to_radians();
-            let x = self.centre.x + (rad.cos() * self.radius);
-            let y = self.centre.y + (rad.sin() * self.radius);
-
-            points.push(Vertex {x, y});
+            let vector = Vertex::from_polar(self.radius, rad);
+            points.push(self.centre + vector);
         }
 
         PolyLine {vertices: points, closed: true}

@@ -22,10 +22,8 @@ impl Arc {
         for s in 1..resolution {
             let i = s as f64 * step * angle_size;
             let angle = self.start_angle + i;
-            let x = self.centre.x + (angle.cos() * self.radius);
-            let y = self.centre.y + (angle.sin() * self.radius);
-
-            points.push(Vertex {x, y});
+            let vector = Vertex::from_polar(self.radius, angle);
+            points.push(self.centre + vector);
         }
 
         PolyLine {vertices: points, closed: false}
