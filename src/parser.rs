@@ -3,6 +3,7 @@ use crate::vertex::{PartialVertex, Vertex};
 use std::slice;
 use crate::spline::Spline;
 use crate::circle::Circle;
+use crate::bulge::{VertexWithBulge, explode_bulged_vertices};
 
 #[derive(PartialEq)]
 enum LineParserState {
@@ -12,9 +13,9 @@ enum LineParserState {
 
 #[derive(PartialEq)]
 enum PolylineParserState {
-    VertexCount,
     Closed,
     Vertex,
+    Finish
 }
 
 #[derive(PartialEq)]
@@ -91,20 +92,14 @@ fn parse_line(iterator: &mut slice::Iter<DataPair>) -> Option<PolyLine> {
 }
 
 fn parse_polyline(iterator: &mut slice::Iter<DataPair>) -> Option<PolyLine> {
-    let mut vertices = vec![];
-    let mut state = PolylineParserState::VertexCount;
+    let mut vertices: Vec<VertexWithBulge> = vec![];
+    let mut state = PolylineParserState::Closed;
     let mut vert = PartialVertex::new();
     let mut closed = false;
     let mut vertices_found :u64 = 0;
-    let mut vertices_expected :u64 = 0;
 
     while let Some(&pair) = iterator.next() {
         match pair {
-            ("90", n) if state == PolylineParserState::VertexCount => {
-                vertices_expected = n.parse().unwrap();
-                state = PolylineParserState::Closed;
-            },
-
             ("70", n) if state == PolylineParserState::Closed => {
                 closed = n == "1";
                 state = PolylineParserState::Vertex;
@@ -116,20 +111,28 @@ fn parse_polyline(iterator: &mut slice::Iter<DataPair>) -> Option<PolyLine> {
 
             ("20", y) if state == PolylineParserState::Vertex => {
                 vert.y = Some(y.parse().unwrap());
+            },
+
+            ("42", b) if state == PolylineParserState::Vertex => {
+                vertices.last_mut().unwrap().bulge = b.parse().unwrap();
+            }
+
+            ("0", _) => {
+                state = PolylineParserState::Finish;
             }
 
             _ => continue
         }
 
         if let Some(v) = Vertex::from_partial(&vert) {
-            vertices.push(v);
+            vertices.push(VertexWithBulge{ vertex: v, bulge: 0.0 });
             vert = PartialVertex::new();
             vertices_found += 1;
         }
 
-        if state == PolylineParserState::Vertex && vertices_expected == vertices_found {
+        if state == PolylineParserState::Finish {
             if vertices_found > 1 {
-                return Some(PolyLine { vertices, closed });
+                return Some(PolyLine { vertices: explode_bulged_vertices(vertices), closed });
             }
 
             return None;

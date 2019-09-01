@@ -1,8 +1,7 @@
 use crate::vertex::Vertex;
 use crate::polyline::PolyLine;
 
-#[derive(Debug)]
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Spline {
     pub control_points: Vec<Vertex>
 }

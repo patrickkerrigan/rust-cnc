@@ -2,8 +2,7 @@ use crate::vertex::Vertex;
 use crate::polyline::PolyLine;
 use std::f64::consts::PI;
 
-#[derive(Debug)]
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Circle {
     pub centre: Vertex,
     pub radius: f64

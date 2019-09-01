@@ -1,7 +1,6 @@
 use crate::vertex::Vertex;
 
-#[derive(Debug)]
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct PolyLine {
     pub vertices: Vec<Vertex>,
     pub closed: bool
