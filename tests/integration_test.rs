@@ -25,7 +25,7 @@ fn dxf_bulge_anticlockwise_test() {
 
 fn test_dxf(dxf_file: &str, nc_file: &str) {
     let dxf = read_to_string(DATA_PATH.to_owned() + dxf_file).unwrap();
-    let gcode = read_to_string(DATA_PATH.to_owned() + nc_file).unwrap();
+    let gcode = read_to_string(DATA_PATH.to_owned() + nc_file).unwrap().replace('\r', "");
 
     assert_eq!(gcode.trim_end(), process(&dxf).trim_end());
 }

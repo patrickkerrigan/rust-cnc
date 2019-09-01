@@ -36,7 +36,7 @@ fn main() {
         exit(1);
     });
 
-    let lines = process(&dxf_contents);
+    let lines = process(&dxf_contents.replace('\r', ""));
 
     println!("{}", lines);
 }
