@@ -78,6 +78,22 @@ impl Vertex {
         (other.y - self.y).atan2(other.x - self.x)
     }
 
+    pub fn x(&self) -> f64 {
+        Vertex::normalise_zero(self.x)
+    }
+
+    pub fn y(&self) -> f64 {
+        Vertex::normalise_zero(self.y)
+    }
+
+    fn normalise_zero(n: f64) -> f64 {
+        if (0.0 - n).abs() < 0.000001 {
+            0.0
+        } else {
+            n
+        }
+    }
+
 }
 
 impl Add for Vertex {

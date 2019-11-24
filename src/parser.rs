@@ -3,6 +3,7 @@ use crate::vertex::{PartialVertex, Vertex};
 use std::slice;
 use crate::spline::Spline;
 use crate::circle::Circle;
+use crate::arc::Arc;
 use crate::bulge::{VertexWithBulge, explode_bulged_vertices};
 
 #[derive(PartialEq)]
@@ -27,7 +28,14 @@ enum SplineParserState {
 #[derive(PartialEq)]
 enum CircleParserState {
     Centre,
-    Radius
+    Radius,
+    Arc,
+    Finish
+}
+
+enum CircleEntity {
+    FullCircle(Circle),
+    Partial(Arc)
 }
 
 type DataPair<'a> = (&'a str, &'a str);
@@ -115,7 +123,7 @@ fn parse_polyline(iterator: &mut slice::Iter<DataPair>) -> Option<PolyLine> {
 
             ("42", b) if state == PolylineParserState::Vertex => {
                 vertices.last_mut().unwrap().bulge = b.parse().unwrap();
-            }
+            },
 
             ("0", _) => {
                 state = PolylineParserState::Finish;
@@ -185,10 +193,12 @@ fn parse_spline(iterator: &mut slice::Iter<DataPair>) -> Option<Spline> {
     None
 }
 
-fn parse_circle(iterator: &mut slice::Iter<DataPair>) -> Option<Circle> {
+fn parse_circle(iterator: &mut slice::Iter<DataPair>) -> Option<CircleEntity> {
     let mut state = CircleParserState::Centre;
     let mut vert = PartialVertex::new();
-    let mut radius: f64 = 0.0;
+    let mut radius: Option<f64> = None;
+    let mut start_angle: Option<f64> = None;
+    let mut end_angle: Option<f64> = None;
 
     while let Some(&pair) = iterator.next() {
         match pair {
@@ -201,18 +211,50 @@ fn parse_circle(iterator: &mut slice::Iter<DataPair>) -> Option<Circle> {
             },
 
             ("40", r) if state == CircleParserState::Radius => {
-                radius = r.parse().unwrap();
+                radius = Some(r.parse().unwrap());
+                state = CircleParserState::Arc;
+            },
+
+            ("50", r) if state == CircleParserState::Arc => {
+                start_angle = Some(r.parse().unwrap());
+            },
+
+            ("51", r) if state == CircleParserState::Arc => {
+                end_angle = Some(r.parse().unwrap());
+            },
+
+            ("0", _) => {
+                state = CircleParserState::Finish;
             }
 
             _ => continue
         }
 
-        if let Some(_) = Vertex::from_partial(&vert) {
+        if let (None, Some(_)) = (radius, Vertex::from_partial(&vert)) {
             state = CircleParserState::Radius;
         }
 
-        if state == CircleParserState::Radius && radius > 0.0 {
-            return Some(Circle{centre: Vertex::from_partial(&vert).unwrap(), radius});
+        if state == CircleParserState::Finish {
+            return match (start_angle, end_angle) {
+                (Some(start), Some(mut end)) => {
+
+                    if end < start {
+                        end += 360.0;
+                    }
+
+                    Some(CircleEntity::Partial(Arc{
+                        centre: Vertex::from_partial(&vert).unwrap(),
+                        radius: radius.unwrap(),
+                        start_angle: start.to_radians(),
+                        end_angle: end.to_radians()
+                    }))
+                },
+
+                _ => Some(CircleEntity::FullCircle(Circle{
+                    centre: Vertex::from_partial(&vert).unwrap(),
+                    radius: radius.unwrap()
+                }))
+            }
         }
     }
 
@@ -244,8 +286,16 @@ fn convert(pairs: &Vec<DataPair>) -> Vec<PolyLine> {
             },
 
             ("100", "AcDbCircle") => {
-                if let Some(circle) = parse_circle(&mut iterator) {
-                    lines.push(circle.into_polyline());
+                match parse_circle(&mut iterator) {
+                    Some(CircleEntity::FullCircle(circle)) => {
+                        lines.push(circle.into_polyline());
+                    },
+
+                    Some(CircleEntity::Partial(arc)) => {
+                        lines.push(arc.into_polyline());
+                    },
+
+                    _ => ()
                 }
             },
 

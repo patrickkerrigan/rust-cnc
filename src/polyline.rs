@@ -17,7 +17,7 @@ impl PolyLine {
 
     pub fn continues_from(&self, previous: &PolyLine) -> bool {
         if let (Some(a), Some(b)) = (self.vertices.first(), previous.vertices.last()) {
-            return a == b;
+            return a.distance_to(b) < 0.001;
         }
 
         false

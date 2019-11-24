@@ -56,15 +56,15 @@ fn polyline_to_gcode(line: &PolyLine) -> String {
     let mut iterator = line.vertices.iter();
 
     if let Some(first_line) = iterator.next() {
-        gcode += format!("M05 F2000 X{:.2} Y{:.2}\n", first_line.x, first_line.y).as_str();
+        gcode += format!("M05 F2000 X{:.2} Y{:.2}\n", first_line.x(), first_line.y()).as_str();
 
         if line.closed {
-            gcode_end += format!("M03 F1000 X{:.2} Y{:.2} S255\n", first_line.x, first_line.y).as_str();
+            gcode_end += format!("M03 F1000 X{:.2} Y{:.2} S255\n", first_line.x(), first_line.y()).as_str();
         }
     }
 
     for line in iterator {
-        gcode += format!("M03 F1000 X{:.2} Y{:.2} S255\n", line.x, line.y).as_str();
+        gcode += format!("M03 F1000 X{:.2} Y{:.2} S255\n", line.x(), line.y()).as_str();
     }
 
     gcode + gcode_end.as_str()

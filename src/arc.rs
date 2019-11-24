@@ -19,7 +19,7 @@ impl Arc {
         let resolution = ((circumference * 1.5) as i64).min(25).max(6);
         let step = 1.0 / (resolution as f64);
 
-        for s in 1..resolution {
+        for s in 0..(resolution + 1) {
             let i = s as f64 * step * angle_size;
             let angle = self.start_angle + i;
             let vector = Vertex::from_polar(self.radius, angle);
