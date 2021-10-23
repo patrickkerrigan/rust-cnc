@@ -1,4 +1,4 @@
-[![Build Status](https://img.shields.io/travis/patrickkerrigan/rust-cnc.svg?style=flat-square)](https://travis-ci.org/patrickkerrigan/rust-cnc)
+[![Build Status](https://img.shields.io/github/workflow/status/patrickkerrigan/rust-cnc/Tests.svg?style=flat-square)](https://github.com/patrickkerrigan/rust-cnc/actions/workflows/tests.yml)
 
 # rust-cnc
 
