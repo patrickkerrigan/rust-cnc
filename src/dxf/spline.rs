@@ -1,5 +1,5 @@
-use crate::vertex::Vertex;
-use crate::polyline::PolyLine;
+use crate::dxf::polyline::PolyLine;
+use crate::dxf::vertex::Vertex;
 
 #[derive(Debug, Clone)]
 pub struct Spline {

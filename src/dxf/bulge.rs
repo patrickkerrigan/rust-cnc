@@ -1,6 +1,6 @@
-use crate::arc::Arc;
-use crate::vertex::Vertex;
 use std::f64::consts::PI;
+use crate::dxf::arc::Arc;
+use crate::dxf::vertex::Vertex;
 
 #[derive(Debug, Clone)]
 pub struct VertexWithBulge {

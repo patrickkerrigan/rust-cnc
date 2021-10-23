@@ -1,7 +1,7 @@
 use std::fs::read_to_string;
 use rust_cnc::{process};
 
-const DATA_PATH: &str = "tests/data/";
+const DATA_PATH: &str = "tests/data/dxf/";
 
 #[test]
 fn dxf_shape_test() {

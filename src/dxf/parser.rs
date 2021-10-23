@@ -1,10 +1,10 @@
-use crate::polyline::PolyLine;
-use crate::vertex::{PartialVertex, Vertex};
 use std::slice;
-use crate::spline::Spline;
-use crate::circle::Circle;
-use crate::arc::Arc;
-use crate::bulge::{VertexWithBulge, explode_bulged_vertices};
+use crate::dxf::arc::Arc;
+use crate::dxf::bulge::{explode_bulged_vertices, VertexWithBulge};
+use crate::dxf::circle::Circle;
+use crate::dxf::polyline::PolyLine;
+use crate::dxf::spline::Spline;
+use crate::dxf::vertex::{PartialVertex, Vertex};
 
 #[derive(PartialEq)]
 enum LineParserState {

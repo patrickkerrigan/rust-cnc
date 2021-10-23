@@ -6,6 +6,10 @@ edition = "2018"
 
 [dependencies]
 libc = "*"
+bmp = "*"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
+
+[profile.release]
+codegen-units = 1

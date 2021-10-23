@@ -1,4 +1,4 @@
-use crate::vertex::Vertex;
+use crate::dxf::vertex::Vertex;
 
 #[derive(Debug, Clone)]
 pub struct PolyLine {
@@ -15,8 +15,22 @@ impl PolyLine {
         PolyLine {vertices, closed: false}
     }
 
+    pub fn reverse(&self) -> PolyLine {
+        let mut vertices = self.vertices.clone();
+        vertices.reverse();
+        PolyLine { vertices, closed: false }
+    }
+
     pub fn continues_from(&self, previous: &PolyLine) -> bool {
         if let (Some(a), Some(b)) = (self.vertices.first(), previous.vertices.last()) {
+            return a.distance_to(b) < 0.001;
+        }
+
+        false
+    }
+
+    pub fn continues_from_reversed(&self, previous: &PolyLine) -> bool {
+        if let (Some(a), Some(b)) = (self.vertices.last(), previous.vertices.last()) {
             return a.distance_to(b) < 0.001;
         }
 
@@ -35,6 +49,11 @@ pub fn glue_polylines(lines: Vec<PolyLine>) -> Vec<PolyLine> {
         match (last_line, line) {
             (Some(l), r) if r.continues_from(l) => {
                 tmp = PolyLine::from_sections(l, r);
+                last_line = Some(&tmp);
+            },
+
+            (Some(l), r) if r.continues_from_reversed(l) => {
+                tmp = PolyLine::from_sections(l, &r.reverse());
                 last_line = Some(&tmp);
             },
 

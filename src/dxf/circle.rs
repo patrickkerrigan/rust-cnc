@@ -1,6 +1,6 @@
-use crate::vertex::Vertex;
-use crate::polyline::PolyLine;
 use std::f64::consts::PI;
+use crate::dxf::polyline::PolyLine;
+use crate::dxf::vertex::Vertex;
 
 #[derive(Debug, Clone)]
 pub struct Circle {
