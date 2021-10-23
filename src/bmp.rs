@@ -32,8 +32,11 @@ fn process_image(bitmap: Image, dpi: u16) -> String {
         let mm_x = x as f32 * mm_per_pixel;
         let mm_y = (height - 1 - y) as f32 * mm_per_pixel;
 
-        let mode = if last_power == 0 { "M05" } else { "M03" };
-        gcode += format!("{} F1000 X{:.2} Y{:.2} S{}\n", mode, mm_x, mm_y, last_power).as_str();
+        if last_power == 0 {
+            gcode += format!("M05 F1000 X{:.2} Y{:.2}\n", mm_x, mm_y).as_str();
+        } else {
+            gcode += format!("M03 F1000 X{:.2} Y{:.2} S{}\n", mm_x, mm_y, last_power).as_str();
+        }
 
         last_power = power;
     }
