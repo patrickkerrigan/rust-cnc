@@ -25,7 +25,7 @@ fn process_image(bitmap: Image, dpi: u16) -> String {
         let x = if y.bitand(1) == 1 { width - 1 - x} else { x };
         let power = 255 - to_greyscale(&bitmap.get_pixel(x, y));
 
-        if power == last_power && x != 0 && x != width - 1 {
+        if power == last_power && ((x != 0 && x != width - 1) || last_power == 0) {
             continue;
         }
 
